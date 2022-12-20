@@ -1,5 +1,6 @@
 from database import db, ma
 from sqlalchemy_json import NestedMutableJson
+from sqlalchemy import func
 
 class Model(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -9,8 +10,8 @@ class Model(db.Model):
     data_parameters = db.Column(NestedMutableJson)
     solution = db.Column(NestedMutableJson)
     solution_path_file = db.Column(db.String)
-    creation_date = db.Column(db.TIMESTAMP, nullable=False)
-    last_edit = db.Column(db.TIMESTAMP)
+    creation_date = db.Column(db.TIMESTAMP(timezone=True), server_default=func.now())
+    last_edit = db.Column(db.TIMESTAMP(timezone=True))
     file_solution_text = db.Column(db.String)
 
 class ModelSchema(ma.Schema):

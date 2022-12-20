@@ -1,9 +1,10 @@
 from flask import jsonify, request
 from flask_restful import Resource
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token
 from werkzeug.security import generate_password_hash
 from database import db
 from models.Users import Users, users_schema
+from errors.error import AuthError
 
 class UserRegisterResource(Resource):
     def post(self):
@@ -23,10 +24,9 @@ class UserRegisterResource(Resource):
             db.session.add(user)
             db.session.commit()
             access_token = create_access_token(identity=username)
-            response = jsonify(access_token=access_token)
+            refresh_token = create_refresh_token(identity=username)
+            response = jsonify(access_token=access_token, refresh_token=refresh_token, userId=user.id)
             response.status_code = 201 # or 400 or whatever
             return response
         except Exception as err:
-            response = jsonify(error="Parameters required are not valid")
-            response.status_code = 404 # or 400 or whatever
-            return response
+            raise AuthError('Informations needed are invalid')

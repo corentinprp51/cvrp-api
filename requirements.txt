@@ -10,3 +10,4 @@ werkzeug
 sqlalchemy-json
 gurobipy == 9.5.2
 numpy
+flask_cors

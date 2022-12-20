@@ -6,12 +6,13 @@ from models.Users import Users
 from models.Model import Model, model_schema
 from database import db
 import uuid
-import json
 import os
+from errors.error import NotAllowedError, NotFoundError
+from utils.mail import MailTemplate
 
 class ModelResource(Resource):
     @jwt_required()
-    def post(self):
+    def post(self, modelId=None):
         current_username = get_jwt_identity() # Get username from current user
         user = Users.query.filter_by(username=current_username).first() # Get user
         model = ModelCVRPApi()
@@ -37,12 +38,14 @@ class ModelResource(Resource):
         db.session.add(modelDB)
         db.session.commit()
         print(model.getRoutesFromSolution())
+        mailTemplate = MailTemplate(user.email, "CVRP - New Model Execution", "Execution ended!")
+        mailTemplate.sendMail()
         return jsonify(model=model_schema.dump(modelDB))
 
     @jwt_required()
-    def put(self):
-        current_user = get_jwt_identity() # Get username from current user
-        modelId = request.args.get('id')
+    def put(self, modelId):
+        current_username = get_jwt_identity() # Get username from current user
+        user = Users.query.filter_by(username=current_username).first() # Get user
         modelDB = Model.query.filter_by(id=modelId).first() # Get model
         parameters = request.json.get('parameters', None)
         if parameters is None:
@@ -66,19 +69,29 @@ class ModelResource(Resource):
         modelDB.solution = model.getRoutesFromSolution()
         db.session.commit()
         print(model.getRoutesFromSolution())
+        mailTemplate = MailTemplate(user.email, f"CVRP - Model Execution {modelDB.name}", "Execution ended!")
+        mailTemplate.sendMail()
         return jsonify(model=model_schema.dump(modelDB))
 
     @jwt_required()
-    def get(self):
+    def get(self, modelId):
         current_username = get_jwt_identity() # Get username from current user
-        modelId = request.args.get('id')
         model = Model.query.filter_by(id=modelId).first() # Get model
         if model == None:
-            response = jsonify(error="Model not found")
-            response.status_code = 404 # or 400 or whatever
-            return response   
+            raise NotFoundError("Model not found") 
         if model.user.username == current_username:
             return jsonify(model=model_schema.dump(model))
-        response = jsonify(error="User not allowed to access it")
-        response.status_code = 401 # or 400 or whatever
-        return response
+        raise NotAllowedError("User not allowed to access it")
+    
+    @jwt_required()
+    def delete(self, modelId):
+        current_username = get_jwt_identity() # Get username from current user
+        user = Users.query.filter_by(username=current_username).first() # Get user
+        model = Model.query.filter_by(id=modelId).first() # Get model
+        if model == None:
+            raise NotFoundError("Model not found") 
+        if user.isadmin or model.user.username == current_username:
+            db.session.delete(model)
+            db.session.commit()
+            return jsonify(modelId=modelId)
+        raise NotAllowedError("User not allowed to delete it")

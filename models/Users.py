@@ -1,5 +1,5 @@
 from database import db, ma
-from models.Model import Model
+from models.Model import ModelSchema
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -8,9 +8,11 @@ class Users(db.Model):
     password = db.Column(db.String, nullable=False)
     firstname = db.Column(db.String, nullable=True)
     lastname = db.Column(db.String, nullable=True)
-    models = db.relationship('Model', backref='user')
+    isadmin = db.Column(db.Boolean, default=False)
+    models = db.relationship('Model', backref='user', cascade='all, delete', passive_deletes=True)
 
 class UserSchema(ma.Schema):
+    models = ma.Nested(ModelSchema, many=True)
     class Meta:
         fields = ("id", "username", "email", "firstname", "lastname", "models")
         model = Users
