@@ -24,7 +24,7 @@ class ModelResource(Resource):
         # Store the model
         # Assign the model to the current user
         modelDB = Model()
-        modelDB.name = 'Test'
+        modelDB.name = request.json.get("name", None)
         modelDB.parameters= request.json.get("parameters", None)
         modelDB.data_parameters= request.json.get("data", None)
         modelDB.solution= model.getRoutesFromSolution()
