@@ -9,6 +9,7 @@ import uuid
 import os
 from errors.error import NotAllowedError, NotFoundError
 from utils.mail import MailTemplate
+import datetime
 
 class ModelResource(Resource):
     @jwt_required()
@@ -48,6 +49,7 @@ class ModelResource(Resource):
         user = Users.query.filter_by(username=current_username).first() # Get user
         modelDB = Model.query.filter_by(id=modelId).first() # Get model
         parameters = request.json.get('parameters', None)
+        name = request.json.get('name', modelDB.name)
         if parameters is None:
             parameters = modelDB.parameters
         model = ModelCVRPApi()
@@ -67,6 +69,9 @@ class ModelResource(Resource):
             f.close()
         os.remove(str(modelDB.id) + '.sol')
         modelDB.solution = model.getRoutesFromSolution()
+        modelDB.parameters = parameters
+        modelDB.name = name
+        modelDB.last_edit = datetime.datetime.now()
         db.session.commit()
         print(model.getRoutesFromSolution())
         mailTemplate = MailTemplate(user.email, f"CVRP - Model Execution {modelDB.name}", "Execution ended!")
