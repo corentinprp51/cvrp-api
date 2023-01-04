@@ -13,8 +13,9 @@ class Users(db.Model):
 
 class UserSchema(ma.Schema):
     models = ma.Nested(ModelSchema, many=True)
+    isAdmin = ma.Bool(attribute="isadmin")
     class Meta:
-        fields = ("id", "username", "email", "firstname", "lastname", "models")
+        fields = ("id", "username", "email", "firstname", "lastname", "models", "isAdmin")
         model = Users
 
 user_schema = UserSchema()

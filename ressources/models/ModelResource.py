@@ -20,6 +20,7 @@ class ModelResource(Resource):
         model.readFromData(request.json['data'])
         model.initModel(request.json['parameters']['vehicle_max_capacity'])
         model.optimizeModel(request.json['parameters'])
+        needEmail = request.json.get('needEmail', False)
         id = str(uuid.uuid4())
         model.modelGurobi.write(id + '.sol')
         # Store the model
@@ -39,8 +40,9 @@ class ModelResource(Resource):
         db.session.add(modelDB)
         db.session.commit()
         print(model.getRoutesFromSolution())
-        mailTemplate = MailTemplate(user.email, "CVRP - New Model Execution", "Execution ended!")
-        mailTemplate.sendMail()
+        if(needEmail):
+            mailTemplate = MailTemplate(user.email, "CVRP - New Model " + modelDB.name + " Execution", "Execution ended!")
+            mailTemplate.sendMail()
         return jsonify(model=model_schema.dump(modelDB))
 
     @jwt_required()
@@ -50,6 +52,7 @@ class ModelResource(Resource):
         modelDB = Model.query.filter_by(id=modelId).first() # Get model
         parameters = request.json.get('parameters', None)
         name = request.json.get('name', modelDB.name)
+        needEmail = request.json.get('needEmail', False)
         if parameters is None:
             parameters = modelDB.parameters
         model = ModelCVRPApi()
@@ -74,8 +77,9 @@ class ModelResource(Resource):
         modelDB.last_edit = datetime.datetime.now()
         db.session.commit()
         print(model.getRoutesFromSolution())
-        mailTemplate = MailTemplate(user.email, f"CVRP - Model Execution {modelDB.name}", "Execution ended!")
-        mailTemplate.sendMail()
+        if(needEmail):
+            mailTemplate = MailTemplate(user.email, f"CVRP - Model Execution {modelDB.name} ended", "Execution ended!")
+            mailTemplate.sendMail()
         return jsonify(model=model_schema.dump(modelDB))
 
     @jwt_required()

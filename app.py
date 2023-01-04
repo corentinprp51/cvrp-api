@@ -9,7 +9,7 @@ from database import db, ma
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import get_jwt
 from flask_jwt_extended import jwt_required
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, create_access_token
 from flask_cors import CORS
 import logging
 from routes.test.HomeResource import HomeResource
@@ -49,7 +49,7 @@ api.add_resource(ModelResource, '/model', '/model/<int:modelId>')
 api.add_resource(ModelListResource, '/models')
 api.add_resource(ListUsersResource, '/users')
 api.add_resource(AdminResource, '/admin')
-api.add_resource(UserResource, '/user/<int:userId>')
+api.add_resource(UserResource, '/user', '/user/<int:userId>')
 
 # Protect a route with jwt_required, which will kick out requests
 # without a valid JWT present.
@@ -80,6 +80,13 @@ def index():
 #     except (RuntimeError, KeyError):
 #         # Case where there is not a valid JWT. Just return the original response
 #         return response
+
+@app.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    return jsonify(access_token=access_token)
 
 # Exception handling
 @app.errorhandler(APIError)

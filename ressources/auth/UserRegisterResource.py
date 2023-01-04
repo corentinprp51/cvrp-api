@@ -3,7 +3,7 @@ from flask_restful import Resource
 from flask_jwt_extended import create_access_token, create_refresh_token
 from werkzeug.security import generate_password_hash
 from database import db
-from models.Users import Users, users_schema
+from models.Users import Users, user_schema
 from errors.error import AuthError
 
 class UserRegisterResource(Resource):
@@ -23,10 +23,12 @@ class UserRegisterResource(Resource):
         try:
             db.session.add(user)
             db.session.commit()
-            access_token = create_access_token(identity=username)
+            additional_claims = {"email": email, "isAdmin": False, "firstname": firstname, "lastname": lastname, "username": username}
+            access_token = create_access_token(identity=username, additional_claims=additional_claims)
             refresh_token = create_refresh_token(identity=username)
-            response = jsonify(access_token=access_token, refresh_token=refresh_token, userId=user.id)
+            response = jsonify(access_token=access_token, refresh_token=refresh_token, user=user_schema.dump(user))
             response.status_code = 201 # or 400 or whatever
             return response
         except Exception as err:
+            print(err)
             raise AuthError('Informations needed are invalid')
