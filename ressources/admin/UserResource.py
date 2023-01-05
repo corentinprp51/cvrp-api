@@ -47,4 +47,40 @@ class UserResource(Resource):
                 return jsonify(firstname=firstname, lastname=lastname)
             else: 
                 raise NotFoundError('User not found')
+        else:
+            #Check if the user is admin
+            userToEdit = Users.query.filter_by(id=userId).first()
+            userAdmin = Users.query.filter_by(id=claims["userId"]).first()
+            if(userAdmin and user and userAdmin.isadmin):
+                username = request.json.get("username", ""),
+                email = request.json.get("email", ""),
+                firstname = request.json.get("firstname", "")
+                lastname = request.json.get("lastname", "")
+                password = request.json.get("password", "")
+                confirm_password = request.json.get("confirm_password", "")
+                if (password != "" and confirm_password != ""):
+                    if (password == confirm_password):
+                        hash_password = generate_password_hash(password)
+                        user.password = hash_password
+                    else: 
+                        raise AuthError('The two passwords must be the same')
+                if (username != ""):
+                    user.username = username
+                else: 
+                    raise AuthError("The username musn't be null")
+                if (email != ""):
+                    user.email = email
+                else:
+                    raise AuthError("The email musn't be null")
+                user.firstname = firstname
+                user.lastname = lastname
+                try:
+                    db.session.commit()
+                    return jsonify(user_schema.dump(user))
+                except Exception:
+                    raise AuthError("Username or email field are not unique")
+            else:
+                raise AuthError('User not admin or user to edit not exist')
+
+
 

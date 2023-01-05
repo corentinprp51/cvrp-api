@@ -20,6 +20,7 @@ from ressources.models.ModelListResource import ModelListResource
 from ressources.admin.ListUsersResource import ListUsersResource
 from ressources.admin.AdminResource import AdminResource
 from ressources.admin.UserResource import UserResource
+from ressources.admin.UserAdminResource import UserAdminResource
 from errors.error import APIError
 import traceback
 import smtplib
@@ -50,6 +51,7 @@ api.add_resource(ModelListResource, '/models')
 api.add_resource(ListUsersResource, '/users')
 api.add_resource(AdminResource, '/admin')
 api.add_resource(UserResource, '/user', '/user/<int:userId>')
+api.add_resource(UserAdminResource, '/admin/user/<int:userId>')
 
 # Protect a route with jwt_required, which will kick out requests
 # without a valid JWT present.

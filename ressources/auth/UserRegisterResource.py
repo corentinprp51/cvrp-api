@@ -23,7 +23,7 @@ class UserRegisterResource(Resource):
         try:
             db.session.add(user)
             db.session.commit()
-            additional_claims = {"email": email, "isAdmin": False, "firstname": firstname, "lastname": lastname, "username": username}
+            additional_claims = {"userId": user.id, "email": email, "isAdmin": False, "firstname": firstname, "lastname": lastname, "username": username}
             access_token = create_access_token(identity=username, additional_claims=additional_claims)
             refresh_token = create_refresh_token(identity=username)
             response = jsonify(access_token=access_token, refresh_token=refresh_token, user=user_schema.dump(user))
