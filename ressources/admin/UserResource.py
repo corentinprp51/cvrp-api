@@ -51,7 +51,7 @@ class UserResource(Resource):
             #Check if the user is admin
             userToEdit = Users.query.filter_by(id=userId).first()
             userAdmin = Users.query.filter_by(id=claims["userId"]).first()
-            if(userAdmin and user and userAdmin.isadmin):
+            if(userAdmin != None and userToEdit != None and userAdmin.isadmin):
                 username = request.json.get("username", ""),
                 email = request.json.get("email", ""),
                 firstname = request.json.get("firstname", "")
@@ -61,22 +61,22 @@ class UserResource(Resource):
                 if (password != "" and confirm_password != ""):
                     if (password == confirm_password):
                         hash_password = generate_password_hash(password)
-                        user.password = hash_password
+                        userToEdit.password = hash_password
                     else: 
                         raise AuthError('The two passwords must be the same')
                 if (username != ""):
-                    user.username = username
+                    userToEdit.username = username
                 else: 
                     raise AuthError("The username musn't be null")
                 if (email != ""):
-                    user.email = email
+                    userToEdit.email = email
                 else:
                     raise AuthError("The email musn't be null")
-                user.firstname = firstname
-                user.lastname = lastname
+                userToEdit.firstname = firstname
+                userToEdit.lastname = lastname
                 try:
                     db.session.commit()
-                    return jsonify(user_schema.dump(user))
+                    return jsonify(user_schema.dump(userToEdit))
                 except Exception:
                     raise AuthError("Username or email field are not unique")
             else:

@@ -21,6 +21,7 @@ from ressources.admin.ListUsersResource import ListUsersResource
 from ressources.admin.AdminResource import AdminResource
 from ressources.admin.UserResource import UserResource
 from ressources.admin.UserAdminResource import UserAdminResource
+from models.Users import Users, user_schema
 from errors.error import APIError
 import traceback
 import smtplib
@@ -88,7 +89,8 @@ def index():
 def refresh():
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity)
-    return jsonify(access_token=access_token)
+    user = Users.query.filter_by(username=identity).first() # Get user
+    return jsonify(access_token=access_token, user=user_schema.dump(user))
 
 # Exception handling
 @app.errorhandler(APIError)
