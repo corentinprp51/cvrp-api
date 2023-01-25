@@ -1,6 +1,5 @@
 flask
 python-dotenv
-psycopg2-binary
 flask_jwt_extended
 Flask-SQLAlchemy
 flask_marshmallow
@@ -11,3 +10,4 @@ sqlalchemy-json
 gurobipy==9.5.2
 numpy
 flask_cors
+psycopg2

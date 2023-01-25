@@ -1,5 +1,4 @@
 import os
-# import psycopg2
 from dotenv import load_dotenv
 from flask import Flask
 from flask import jsonify
@@ -12,7 +11,6 @@ from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager, create_access_token
 from flask_cors import CORS
 import logging
-from routes.test.HomeResource import HomeResource
 from ressources.auth.UserRegisterResource import UserRegisterResource
 from ressources.auth.UserLoginResource import UserLoginResource
 from ressources.models.ModelResource import ModelResource
@@ -44,7 +42,6 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 jwt = JWTManager(app)
 
-api.add_resource(HomeResource, '/')
 api.add_resource(UserRegisterResource, '/register')
 api.add_resource(UserLoginResource, '/login')
 api.add_resource(ModelResource, '/model', '/model/<int:modelId>')
@@ -63,7 +60,7 @@ def protected():
     current_user = get_jwt_identity()
     jwt = get_jwt()
     print(jwt)
-    return jsonify(logged_in_as=current_user), 200
+    return jsonify(logged_in_as=current_user, test="ok"), 200
 
 @app.route("/send_mail")
 def index():
